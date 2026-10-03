@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FloodAid – Flood Emergency Assistance</title>
+<style>
+:root{--bg:#f3f6fb;--card:#fff;--tx:#0f1b2d;--mut:#55657a;--bd:#d6dfeb;--land:#e6eee0;--road:#b9c2cc;--safe:#14803f;--watch:#a87500;--warn:#cc5a06;--evac:#c8102e;--water:#1e88e5;--rc:var(--warn);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1522;--card:#13233a;--tx:#eaf1fb;--mut:#9fb2c9;--bd:#27405f;--land:#18291f;--road:#3b4b5c;--safe:#3fcf7a;--watch:#f0c040;--warn:#ff9a4d;--evac:#ff5b6e}}
+:root[data-theme="dark"]{--bg:#0b1522;--card:#13233a;--tx:#eaf1fb;--mut:#9fb2c9;--bd:#27405f;--land:#18291f;--road:#3b4b5c;--safe:#3fcf7a;--watch:#f0c040;--warn:#ff9a4d;--evac:#ff5b6e}
+*{box-sizing:border-box}html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--tx);font:16px/1.45 Inter,"Noto Sans","Noto Sans Telugu","Noto Sans Devanagari",system-ui,sans-serif;padding-bottom:150px}
+button,select{font:inherit;color:inherit}button{cursor:pointer}
+.app{max-width:720px;margin:0 auto}
+header{display:flex;align-items:center;gap:8px;padding:12px 14px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:20}
+header h1{font-size:20px;margin:0;flex:1}header h1 small{display:block;font-size:12px;font-weight:500;color:var(--mut)}
+.ib{min-height:48px;min-width:48px;border:1px solid var(--bd);background:var(--card);border-radius:12px;padding:0 10px}
+.sim{margin:0 14px 10px;padding:10px 14px;background:var(--card);border:1px dashed var(--bd);border-radius:12px;font-size:14px}
+.sim input{width:100%;height:32px;accent-color:var(--water)}
+.view{display:none;padding:0 14px}.view.on{display:block}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:12px}
+.card h3{margin:0 0 8px;font-size:17px}
+.hero{position:relative;overflow:hidden;border-radius:18px;padding:18px 16px 54px;color:#fff;background:linear-gradient(160deg,var(--rc),#10243f 140%);margin-bottom:12px;transition:background .6s}
+.hero .rk{font-weight:800;letter-spacing:.04em;font-size:14px;opacity:.95}.hero h2{margin:4px 0 6px;font-size:28px}.hero p{margin:0;font-size:18px;max-width:30em}
+.hw{position:absolute;left:0;bottom:0;width:100%;height:46px}
+.rain{position:absolute;inset:0;pointer-events:none;transition:opacity .6s}
+.rain i{position:absolute;top:-20px;width:2px;height:16px;background:rgba(255,255,255,.55);animation:fall linear infinite}
+@keyframes fall{to{transform:translateY(260px)}}
+.wv{animation:wave 3s linear infinite}.wv2{animation:wave 5s linear infinite reverse}
+@keyframes wave{to{transform:translateX(-60px)}}
+.g{display:flex;gap:14px;align-items:center}.g svg{flex:none;width:112px;height:176px}
+.stat b{font-size:30px}.badge{display:inline-block;padding:2px 10px;border-radius:99px;font-weight:700;font-size:13px;border:2px solid currentColor}
+.qa{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+.qa button{min-height:64px;border-radius:14px;border:1px solid var(--bd);background:var(--card);font-weight:700;font-size:16px}
+.pr{border-bottom:1px solid var(--bd);padding:8px 0}.pr:last-child{border:0}.pr summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center;gap:8px}
+.pr p{margin:2px 0 6px 34px;color:var(--mut)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.chip{min-height:44px;border-radius:99px;border:1px solid var(--bd);background:var(--card);padding:0 14px;font-weight:600}.chip.on{background:var(--tx);color:var(--bg)}
+.al{border-left:8px solid;border-radius:12px}.al .m{font-size:13px;color:var(--mut)}
+.s-watch{border-color:var(--watch)}.s-warn{border-color:var(--warn)}.s-evac{border-color:var(--evac)}
+.bar{height:12px;border-radius:99px;background:var(--bd);overflow:hidden;margin:6px 0}.bar i{display:block;height:100%;background:var(--safe);transition:width .5s}
+.fac{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.fac span{background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:2px 8px;font-size:13px}
+.btn{min-height:48px;border-radius:12px;border:0;padding:0 16px;font-weight:700;background:var(--water);color:#fff;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.btn.r{background:var(--evac)}.btn.o{background:transparent;color:var(--tx);border:1px solid var(--bd)}
+.map{border-radius:16px;overflow:hidden;border:1px solid var(--bd);margin-bottom:10px;background:var(--land)}.map svg{display:block;width:100%;height:auto}
+#fl{transition:stroke-width .7s,stroke .6s}
+.flow{stroke-dasharray:14 22;animation:flow 1.2s linear infinite}@keyframes flow{to{stroke-dashoffset:-36}}
+.rt{stroke-dasharray:10 8;animation:flow .9s linear infinite}
+.pulse{animation:pl 1.4s ease-out infinite;transform-origin:235px 300px}@keyframes pl{from{transform:scale(.6);opacity:.9}to{transform:scale(2.2);opacity:0}}
+.lg{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--mut);margin:6px 0}
+.tg label{display:inline-flex;align-items:center;gap:6px;min-height:40px;margin-right:10px}
+.ct{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.ct a{min-height:68px;flex-direction:column;font-size:15px}.ct a b{font-size:22px}
+.ck label{display:flex;gap:10px;align-items:center;min-height:44px}.ck input{width:22px;height:22px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--bd);display:flex;padding-bottom:env(safe-area-inset-bottom,0px);z-index:30}
+nav button{flex:1;min-height:60px;border:0;background:none;font-size:12px;font-weight:600;color:var(--mut)}nav button span{display:block;font-size:22px}nav button.on{color:var(--water);box-shadow:inset 0 3px var(--water)}
+.sos{position:fixed;right:12px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:40;min-height:56px;border-radius:99px;background:var(--evac);color:#fff;border:3px solid #fff;font-weight:800;padding:0 20px;text-decoration:none;display:flex;align-items:center;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+#ov{position:fixed;inset:0;z-index:50;background:var(--evac);color:#fff;display:none;flex-direction:column;justify-content:center;padding:24px;text-align:center;animation:bl 1s infinite alternate}
+@keyframes bl{to{filter:brightness(.8)}}#ov h2{font-size:34px;margin:0 0 10px}#ov p{font-size:20px}#ov .btn{background:#fff;color:var(--evac);min-height:60px;font-size:20px;margin-top:10px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:150px;background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:12px;display:none;z-index:60}
+select{min-height:48px;width:100%;border-radius:12px;border:1px solid var(--bd);background:var(--card);padding:0 10px;margin-bottom:10px}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-iteration-count:1!important}}
+</style></head><body>
+<div class="app">
+<header>
+<h1>🌊 FloodAid<small>Godavari District – sample data</small></h1>
+<select id="lg" class="ib" aria-label="Language" style="width:auto;margin:0"><option value="en">EN</option><option value="te">తె</option><option value="hi">हि</option></select>
+<button class="ib" id="th" aria-label="Toggle dark mode">🌓</button>
+</header>
+<div class="sim"><label for="lv"><b data-i="sim">Simulate river level</b> — <span id="lvt"></span></label><input id="lv" type="range" min="0" max="100" value="62"></div>
+
+<main>
+<section id="v-home" class="view on">
+ <div class="hero"><div class="rain" id="rain"></div><div class="rk" id="rk"></div><h2 id="rt"></h2><p id="ra"></p>
+  <svg class="hw" viewBox="0 0 120 46" preserveAspectRatio="none" aria-hidden="true"><g class="wv2" opacity=".35"><path d="M0 14Q15 4 30 14T60 14T90 14T120 14T150 14T180 14V46H0Z" fill="#fff"/></g><g class="wv"><path d="M0 22Q15 12 30 22T60 22T90 22T120 22T150 22T180 22V46H0Z" fill="#fff" opacity=".3"/></g></svg></div>
+ <div class="qa"><a class="btn r ib" style="min-height:64px;text-decoration:none;background:var(--evac);color:#fff;justify-content:center" href="tel:112">📞 Call 112</a><button data-go="shelters">🏫 Find shelter</button><button data-go="map">🧭 Safe route</button><button data-go="help">☎️ Contacts</button></div>
+ <div class="card"><h3>River level</h3><div class="g">
+  <svg viewBox="0 0 112 176" role="img" aria-label="Water level gauge"><defs><clipPath id="cp"><rect x="6" y="10" width="100" height="150" rx="10"/></clipPath></defs>
+   <rect x="6" y="10" width="100" height="150" rx="10" fill="none" stroke="var(--bd)" stroke-width="3"/>
+   <g clip-path="url(#cp)"><g id="wg" style="transition:transform .7s ease"><g class="wv2" opacity=".5"><path d="M0 6Q15 -4 30 6T60 6T90 6T120 6T150 6T180 6V260H0Z" fill="#64b5f6"/></g><g class="wv"><path d="M0 10Q15 0 30 10T60 10T90 10T120 10T150 10T180 10V260H0Z" fill="var(--water)" opacity=".85"/></g></g>
+   <line x1="6" x2="106" y1="70" y2="70" stroke="var(--warn)" stroke-dasharray="4 3" stroke-width="2"/><line x1="6" x2="106" y1="40" y2="40" stroke="var(--evac)" stroke-dasharray="4 3" stroke-width="2"/></g>
+   <text x="10" y="67" font-size="9" fill="var(--warn)" font-weight="700">DANGER</text><text x="10" y="37" font-size="9" fill="var(--evac)" font-weight="700">EVACUATE</text></svg>
+  <div class="stat"><b id="mt"></b> m<br><span class="badge" id="tr"></span><p style="color:var(--mut);margin:8px 0 0;font-size:14px">Danger mark 7.2 m · Evacuation mark 9.6 m</p></div></div></div>
+ <div class="card"><h3>Nearest help</h3><div id="nh"></div></div>
+ <div class="card"><h3>Real problems → how this app solves them</h3><div id="pb"></div></div>
+</section>
+
+<section id="v-alerts" class="view"><div class="chips" id="af"></div><div id="al"></div></section>
+
+<section id="v-map" class="view">
+ <div class="map"><svg id="map" viewBox="0 0 360 420" role="img" aria-label="Flood map">
+  <g id="gs"><ellipse cx="300" cy="110" rx="70" ry="62" fill="var(--safe)" opacity=".16"/><ellipse cx="60" cy="250" rx="55" ry="60" fill="var(--safe)" opacity=".16"/><ellipse cx="310" cy="370" rx="62" ry="48" fill="var(--safe)" opacity=".16"/></g>
+  <path id="fl" d="M205,0C190,100 140,150 175,220S150,330 150,420" fill="none" stroke="var(--rc)" stroke-width="40" stroke-linecap="round" opacity=".38"/>
+  <g id="gr" fill="none" stroke="var(--road)" stroke-width="5" stroke-linecap="round"><path d="M10,232L110,232 172,212 340,200"/><path d="M235,300L262,240 290,170 300,110"/><path d="M235,300L270,340 310,370"/><path d="M300,110L300,260 310,370"/><path d="M110,232L60,250"/></g>
+  <path d="M205,0C190,100 140,150 175,220S150,330 150,420" fill="none" stroke="var(--water)" stroke-width="20" stroke-linecap="round"/>
+  <path class="flow" d="M205,0C190,100 140,150 175,220S150,330 150,420" fill="none" stroke="#fff" stroke-width="3" opacity=".55"/>
+  <g id="br" transform="translate(172 212)"><rect x="-13" y="-8" width="26" height="16" rx="4" fill="var(--card)" stroke="var(--tx)"/><text id="brt" y="5" text-anchor="middle" font-size="12">🌉</text></g>
+  <path id="ra2" fill="none" stroke="var(--water)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path id="rm" class="rt" fill="none" stroke="var(--safe)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <g id="gh"></g>
+  <text x="300" y="236" text-anchor="middle" font-size="18">🏥</text>
+  <circle class="pulse" cx="235" cy="300" r="12" fill="var(--water)"/><circle cx="235" cy="300" r="8" fill="var(--water)" stroke="#fff" stroke-width="3"/><text x="235" y="322" text-anchor="middle" font-size="11" font-weight="700" fill="var(--tx)">YOU</text>
+ </svg></div>
+ <div class="lg"><span>🟦 River</span><span style="color:var(--rc)">▮ Flood zone</span><span style="color:var(--safe)">▮ Safe ground</span><span>🟢 Main route</span><span>🔵 Alternate</span><span style="color:var(--evac)">🔴 Blocked</span></div>
+ <div class="tg"><label><input type="checkbox" checked data-ly="fl"> Flood</label><label><input type="checkbox" checked data-ly="gs"> Safe ground</label><label><input type="checkbox" checked data-ly="gh"> Shelters</label></div>
+ <div class="card"><h3>Evacuation route</h3><select id="ss" aria-label="Choose shelter"></select><div id="ri"></div></div>
+</section>
+
+<section id="v-shelters" class="view"><div class="chips" id="sf"></div><div id="sl"></div></section>
+
+<section id="v-help" class="view">
+ <div class="card"><h3>Emergency contacts (tap to call)</h3><div class="ct">
+  <a class="btn r" href="tel:112"><b>112</b>All emergencies</a><a class="btn" href="tel:108"><b>108</b>Ambulance</a><a class="btn" href="tel:100"><b>100</b>Police</a><a class="btn" href="tel:101"><b>101</b>Fire</a><a class="btn" href="tel:1070"><b>1070</b>State disaster control</a><a class="btn" href="tel:1077"><b>1077</b>District control room</a></div></div>
+ <div class="card"><h3>Relief points</h3><div id="rp"></div></div>
+ <div class="card"><h3>What to do</h3><div id="sf2"></div></div>
+ <div class="card"><h3>Emergency kit</h3><div class="ck" id="ck"></div><button class="btn o" id="sh" style="width:100%;margin-top:8px">📍 Share my location with family</button></div>
+</section>
+</main></div>
+
+<a class="sos" href="tel:112" aria-label="SOS call 112">🆘 <span data-i="sos">SOS 112</span></a>
+<nav id="nv"></nav>
+<div id="ov" role="alertdialog"><h2>🚨 EVACUATE NOW</h2><p>Water has crossed the evacuation mark. Leave immediately using the safe route.</p><button class="btn" id="ovg">Show safe route</button><button class="btn" id="ovx" style="background:transparent;color:#fff;border:2px solid #fff">Dismiss</button></div>
+<div id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const D={en:{home:'Home',alerts:'Alerts',map:'Map',shelters:'Shelters',help:'Help',sos:'SOS 112',sim:'Simulate river level',r:['SAFE','WATCH','WARNING','EVACUATE'],a:['No action needed. Stay informed.','Stay alert. Pack your emergency kit.','Prepare to leave. Move valuables up. Avoid low roads.','LEAVE NOW. Go to the nearest shelter by the green route.']},
+te:{home:'హోమ్',alerts:'హెచ్చరికలు',map:'మ్యాప్',shelters:'శిబిరాలు',help:'సహాయం',sos:'SOS 112',sim:'నది స్థాయి అనుకరణ',r:['సురక్షితం','జాగ్రత్త','హెచ్చరిక','ఖాళీ చేయండి'],a:['చర్య అవసరం లేదు. సమాచారం తెలుసుకోండి.','అప్రమత్తంగా ఉండండి. అత్యవసర కిట్ సిద్ధం చేయండి.','బయలుదేరడానికి సిద్ధంగా ఉండండి. విలువైనవి పైకి తరలించండి.','ఇప్పుడే బయలుదేరండి. ఆకుపచ్చ మార్గంలో సమీప శిబిరానికి వెళ్లండి.']},
+hi:{home:'होम',alerts:'अलर्ट',map:'नक्शा',shelters:'शेल्टर',help:'मदद',sos:'SOS 112',sim:'नदी स्तर सिमुलेशन',r:['सुरक्षित','निगरानी','चेतावनी','तुरंत निकलें'],a:['कोई कार्रवाई जरूरी नहीं। सतर्क रहें।','सतर्क रहें। आपातकालीन किट तैयार रखें।','निकलने की तैयारी करें। कीमती सामान ऊपर रखें।','अभी निकलें। हरे रास्ते से नजदीकी शेल्टर जाएं।']}};
+const RK=[{c:'--safe',i:'✅'},{c:'--watch',i:'👀'},{c:'--warn',i:'⚠️'},{c:'--evac',i:'🚨'}];
+const R=l=>l<35?0:l<60?1:l<80?2:3;
+const FAC={food:'🍲 Food',water:'💧 Water',medical:'⚕️ Medical',power:'🔌 Power',toilet:'🚻 Toilets',pets:'🐕 Pets',access:'♿ Accessible'};
+const S=[
+{n:'Govt. High School',x:300,y:110,cap:400,b:120,g:3.2,f:['food','water','medical','power','toilet','access'],r:[{p:[[235,300],[262,240],[290,170],[300,110]],k:999},{p:[[235,300],[210,262],[250,160],[300,110]],k:999}]},
+{n:'Community Hall (west bank)',x:60,y:250,cap:250,b:80,g:2,f:['food','water','toilet','pets'],r:[{p:[[235,300],[205,235],[172,212],[110,232],[60,250]],k:60},{p:[[235,300],[200,380],[110,330],[60,250]],k:85}]},
+{n:'District Stadium',x:310,y:370,cap:500,b:200,g:4,f:['food','water','medical','power','toilet','pets','access'],r:[{p:[[235,300],[270,340],[310,370]],k:999},{p:[[235,300],[250,385],[310,370]],k:999}]}];
+const AL=[[0,'watch','Heavy rain forecast for next 24 h','Upper basin','IMD','Keep phones charged. Review your evacuation plan.'],[30,'watch','River rising at barrage gauge','Barrage','Central Water Commission','Avoid river banks and fishing.'],[50,'watch','Move livestock and documents upstairs','Riverside wards','District Control Room','Pack the emergency kit now.'],[60,'warn','Bridge Road flooded – closed to traffic','Bridge Road','Revenue Dept.','Use alternate routes only.'],[70,'warn','Prepare to evacuate: Wards 4–6','Riverside Colony','District Collector','Be ready to leave within 30 minutes.'],[80,'evac','EVACUATE NOW: Wards 4–6','Riverside Colony','District Collector','Go to the nearest open shelter by the green route.'],[88,'evac','Switch off mains; stay away from poles','All low areas','Electricity Dept.','Do not touch wires or enter water.'],[92,'evac','Boat rescue teams deployed','Wards 4–6','NDRF / SDRF','Signal from rooftops; call 112 or 1070.']];
+const RP=[['🍲 Food kitchen – Panchayat Office','6 am – 10 pm'],['💧 Drinking water – Govt. School gate','24 h'],['⚕️ Medical camp – PHC','8 am – 8 pm'],['🚤 Rescue boats – Barrage Ghat','24 h']];
+const SF=[['Before','Pack kit & documents · Know your shelter · Move valuables up · Charge phones'],['During','Move to high ground · Never walk or drive through floodwater · Switch off power · Stay off bridges'],['After','Return only when authorities say so · Boil drinking water · Avoid fallen wires · Photograph damage for claims']];
+const KIT=['Drinking water','Medicines','ID & documents (in a bag)','Torch + power bank','Dry food','First-aid kit'];
+const PB=[['😵','Panic and information overload','One colour-coded risk banner with one action sentence. Severity is shown by colour, icon and word.'],['🗺️','People don’t know where is safe','The map shows the flood zone growing with the water level, plus safe ground, shelters and the hospital.'],['🚧','Roads and bridges flood without warning','Blocked roads turn red automatically. The app switches to the alternate route, or says “no safe road – call 112”.'],['🏫','Shelters overcrowd','Live capacity bars and Full status. “Suggested shelter” skips full or unreachable ones.'],['📶','Network failure','Lightweight page: no images or map tiles, one-tap tel: calls. Production adds an offline service worker and SMS fallback.'],['🗣️','Language and literacy barriers','English / తెలుగు / हिन्दी for key labels, icons with text, 48 px tap targets.'],['♿','Elderly, disabled, pet owners','Facility filters: accessible, medical, pet-friendly.'],['📢','Rumours and fake alerts','Every alert shows its official source and time.']];
+let L=62,prev=62,lang='en',view='home',sel=0,af='all',sf=new Set(),dis=false;
+const len=p=>p.reduce((a,q,i)=>i?a+Math.hypot(q[0]-p[i-1][0],q[1]-p[i-1][1]):0,0)*12;
+const occ=s=>Math.min(s.cap,Math.round(s.b+L*s.g));
+const plan=s=>{const[m,a]=s.r,mb=L>=m.k,ab=L>=a.k;return{m,a,mb,ab,rec:!mb?m:!ab?a:null}};
+const stat=s=>{const q=occ(s)/s.cap;return q>=1?['Full','var(--evac)']:q>=.8?['Filling up','var(--warn)']:['Open','var(--safe)']};
+const best=()=>{let b=-1,d=1e9;S.forEach((s,i)=>{const p=plan(s);if(p.rec&&stat(s)[0]!=='Full'&&len(p.rec.p)<d){d=len(p.rec.p);b=i}});return b};
+const dir=(a,b)=>['east','north-east','north','north-west','west','south-west','south','south-east'][Math.round(Math.atan2(a[1]-b[1],b[0]-a[0])/(Math.PI/4)+8)%8];
+const toast=t=>{const e=$('#toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2200)};
+const pts=p=>p.map(q=>q.join(',')).join(' ').replace(/^/,'M').replace(/ /g,' L');
+
+function go(v){view=v;$$('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));scrollTo(0,0)}
+function tr(){$$('[data-i]').forEach(e=>e.textContent=D[lang][e.dataset.i]);$$('nav button').forEach(b=>b.lastChild.textContent=D[lang][b.dataset.v]);document.documentElement.lang=lang}
+
+function upd(){
+ const r=R(L),k=RK[r],t=D[lang];
+ document.documentElement.style.setProperty('--rc','var('+k.c+')');
+ $('#rk').textContent=k.i+' '+t.r[r];$('#rt').textContent=t.r[r];$('#ra').textContent=t.a[r];
+ $('#rain').style.opacity=.1+L/110;
+ $('#wg').style.transform='translateY('+(10+(100-L)*1.5)+'px)';
+ $('#mt').textContent=(L*.12).toFixed(1);$('#lvt').textContent=(L*.12).toFixed(1)+' m';
+ $('#tr').textContent=L>prev?'⬆ Rising':L<prev?'⬇ Falling':'➡ Steady';prev=L;
+ $('#fl').setAttribute('stroke-width',24+L*2.4);
+ $('#brt').textContent=L>=60?'❌':'🌉';
+ const b=best(),bs=S[b];
+ $('#nh').innerHTML=(bs?`<b>🏫 ${bs.n}</b><br>${Math.round(len(plan(bs).rec.p))} m · ${stat(bs)[0]}`:'<b>No safe road to a shelter.</b> Call 112 / 1070 and move to the highest floor.')+'<br><b>🏥 Area Hospital</b><br>about 1.2 km · open 24 h';
+ const al=AL.filter(a=>a[0]<=L&&(af==='all'||a[1]===af)).reverse();
+ $('#af').innerHTML=[['all','All'],['watch','Watch'],['warn','Warning'],['evac','Evacuate']].map(c=>`<button class="chip ${af===c[0]?'on':''}" data-af="${c[0]}">${c[1]}</button>`).join('');
+ $('#al').innerHTML=al.map(a=>`<div class="card al s-${a[1]}"><b>${a[1]==='evac'?'🚨':a[1]==='warn'?'⚠️':'👀'} ${a[2]}</b><div class="m">${a[3]} · Source: ${a[4]} · ${Math.max(1,Math.round((L-a[0])/2))*10} min ago</div><p style="margin:6px 0 0"><b>Do:</b> ${a[5]}</p></div>`).join('')||'<div class="card">No alerts.</div>';
+ $('#sf').innerHTML=Object.keys(FAC).map(f=>`<button class="chip ${sf.has(f)?'on':''}" data-sf="${f}">${FAC[f]}</button>`).join('');
+ const order=S.map((s,i)=>i).filter(i=>[...sf].every(f=>S[i].f.includes(f))).sort((x,y)=>len(S[x].r[0].p)-len(S[y].r[0].p));
+ $('#sl').innerHTML=order.map(i=>{const s=S[i],o=occ(s),[st,c]=stat(s),p=plan(s),bad=!p.rec;
+  return `<div class="card"><b>${s.n}</b> ${i===b?'⭐ <span class="badge" style="color:var(--safe)">Suggested</span>':''}<div><span class="badge" style="color:${c}">${st}</span> ${bad?'<span class="badge" style="color:var(--evac)">Road flooded</span>':''}</div>
+  <div>${Math.round(len(s.r[0].p))} m away · ${s.cap-o} of ${s.cap} places free</div><div class="bar"><i style="width:${o/s.cap*100}%;background:${c}"></i></div>
+  <div class="fac">${s.f.map(f=>`<span>${FAC[f]}</span>`).join('')}</div>
+  <div style="display:flex;gap:8px"><button class="btn" data-nav="${i}">🧭 Navigate</button><a class="btn o" href="tel:1077">📞 Call</a></div></div>`}).join('')||'<div class="card">No shelter matches those filters.</div>';
+ $('#gh').innerHTML=S.map((s,i)=>`<text x="${s.x}" y="${s.y+6}" text-anchor="middle" font-size="${i===sel?26:20}">🏫</text><text x="${s.x}" y="${s.y+22}" text-anchor="middle" font-size="9" font-weight="700" fill="var(--tx)">${s.n.split(' ')[0]} ${s.n.split(' ')[1]||''}</text>`).join('');
+ $('#ss').innerHTML=S.map((s,i)=>`<option value="${i}" ${i===sel?'selected':''}>${s.n}</option>`).join('');
+ const s=S[sel],p=plan(s),rm=$('#rm'),ra=$('#ra2');
+ rm.setAttribute('d',pts(s.r[0].p));ra.setAttribute('d',pts(s.r[1].p));
+ rm.setAttribute('stroke',p.mb?'var(--evac)':'var(--safe)');ra.setAttribute('stroke',p.ab?'var(--evac)':'var(--water)');
+ ra.setAttribute('stroke-dasharray',p.ab?'4 8':'none');
+ const inZ=235-160<12+1.2*L,use=p.rec||s.r[0],tm=len(use.p);
+ let h=inZ?'<div class="badge" style="color:var(--evac);margin-bottom:8px">⚠ You are inside the flood zone</div>':'<div class="badge" style="color:var(--safe);margin-bottom:8px">✓ Your location is outside the flood zone</div>';
+ if(!p.rec)h+=`<p><b style="color:var(--evac)">No safe road to this shelter.</b> Both routes cross floodwater. Choose another shelter${b>=0?` (suggested: <b>${S[b].n}</b>)`:''} or call 112 / 1070.</p>`;
+ else{h+=`<p>${p.mb?'🔴 Main route is flooded – use the <b>alternate (blue)</b> route.':'🟢 Main route is clear.'} <b>Avoid flooded roads.</b></p><p>🚶 ${Math.round(tm/75)} min walking · 🚗 ${Math.max(1,Math.round(tm/300))} min by vehicle · ${Math.round(tm)} m</p><ol style="padding-left:20px;margin:0">`+use.p.slice(1).map((q,j)=>`<li>Head ${dir(use.p[j],q)} for ${Math.round(Math.hypot(q[0]-use.p[j][0],q[1]-use.p[j][1])*12)} m</li>`).join('')+`<li>Arrive at ${s.n}</li></ol>`}
+ $('#ri').innerHTML=h;
+ if(L<80)dis=false;
+ $('#ov').style.display=L>=80&&!dis?'flex':'none';
+}
+
+$('#nv').innerHTML=[['home','🏠'],['alerts','🔔'],['map','🗺️'],['shelters','🏫'],['help','☎️']].map(a=>`<button data-v="${a[0]}"${a[0]==='home'?' class="on"':''}><span>${a[1]}</span>x</button>`).join('');
+$('#pb').innerHTML=PB.map(p=>`<details class="pr"><summary><span>${p[0]}</span>${p[1]}</summary><p>${p[2]}</p></details>`).join('');
+$('#rp').innerHTML=RP.map(r=>`<div class="pr"><b>${r[0]}</b><br><span style="color:var(--mut)">Open: ${r[1]}</span></div>`).join('');
+$('#sf2').innerHTML=SF.map(s=>`<p><b>${s[0]}:</b> ${s[1]}</p>`).join('');
+let ck={};try{ck=JSON.parse(localStorage.getItem('fa-ck')||'{}')}catch(e){}
+$('#ck').innerHTML=KIT.map((k,i)=>`<label><input type="checkbox" data-k="${i}" ${ck[i]?'checked':''}>${k}</label>`).join('');
+const rain=$('#rain');for(let i=0;i<28;i++){const d=document.createElement('i');d.style.left=Math.random()*100+'%';d.style.animationDuration=(.6+Math.random()*.6)+'s';d.style.animationDelay=-Math.random()+'s';rain.appendChild(d)}
+
+document.addEventListener('click',e=>{const t=e.target.closest('button,[data-go]');if(!t)return;
+ if(t.dataset.v)go(t.dataset.v);else if(t.dataset.go)go(t.dataset.go);
+ else if(t.dataset.af){af=t.dataset.af;upd()}
+ else if(t.dataset.sf){sf.has(t.dataset.sf)?sf.delete(t.dataset.sf):sf.add(t.dataset.sf);upd()}
+ else if(t.dataset.nav){sel=+t.dataset.nav;upd();go('map')}
+ else if(t.id==='ovg'){const b=best();if(b>=0)sel=b;dis=true;upd();go('map')}
+ else if(t.id==='ovx'){dis=true;upd()}
+ else if(t.id==='th'){const r=document.documentElement;r.dataset.theme=(r.dataset.theme||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'))==='dark'?'light':'dark'}
+ else if(t.id==='sh')toast('Location link ready to send (demo only)')});
+document.addEventListener('change',e=>{const t=e.target;
+ if(t.id==='ss'){sel=+t.value;upd()}
+ else if(t.dataset.ly){$(t.dataset.ly==='fl'?'#fl':'#'+t.dataset.ly).style.display=t.checked?'':'none'}
+ else if(t.dataset.k){ck[t.dataset.k]=t.checked;try{localStorage.setItem('fa-ck',JSON.stringify(ck))}catch(x){}}
+ else if(t.id==='lg'){lang=t.value;tr();upd()}});
+$('#lv').addEventListener('input',e=>{L=+e.target.value;upd()});
+tr();upd();
+</script></body></html>
